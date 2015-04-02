@@ -1,0 +1,12 @@
+## Allow worker to run all commands without a password
+clus  ALL=(ALL)  NOPASSWD: ALL
+
+#
+# Allow "ssh hostname sudo <cmd>" without -t (TTY) option,
+# because some remote management tools require it.
+#
+# IMPORTANT: The user must have "NOPASSWORD: ALL" because
+# "ssh hostname sudo <cmd>" will show the password in clear.
+# If not, you should run "ssh -t hostname sudo <cmd>" instead.
+#
+Defaults:clus   !requiretty
