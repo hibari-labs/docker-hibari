@@ -22,11 +22,11 @@ docker kill hibari4
 docker kill hibari3
 docker kill hibari2
 docker kill hibari1
-docker kill hibaribench
+docker kill hibari-builder
 docker rm hibari6
 docker rm hibari5
 docker rm hibari4
 docker rm hibari3
 docker rm hibari2
 docker rm hibari1
-docker rm hibaribench
+docker rm hibari-builder

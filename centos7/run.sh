@@ -28,7 +28,7 @@ docker rm hibari4
 docker rm hibari3
 docker rm hibari2
 docker rm hibari1
-docker rm hibaribench
+docker rm hibari-builder
 
 docker run -d --name hibari1 -h hibari1 \
            quay.io/hibaridb/hibari-deploy-base:latest-centos7
@@ -48,11 +48,11 @@ docker run -d --name hibari5 -h hibari5 \
 docker run -d --name hibari6 -h hibari6 \
            quay.io/hibaridb/hibari-deploy-base:latest-centos7
 
-docker run -it --name hibaribench -h hibaribench \
+docker run -it --name hibari-builder -h hibari-builder \
            --link=hibari1:hibari1 \
            --link=hibari2:hibari2 \
            --link=hibari3:hibari3 \
            --link=hibari4:hibari4 \
            --link=hibari5:hibari5 \
            --link=hibari6:hibari6 \
-           quay.io/hibaridb/hibari:dev-otp17-centos7 bash
+           quay.io/hibaridb/hibari-builder:dev-otp17-archlinux bash
