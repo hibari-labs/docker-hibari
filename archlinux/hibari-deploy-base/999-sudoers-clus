@@ -1,4 +1,4 @@
-## Allow worker to run all commands without a password
+## Allow clus to run all commands without a password
 clus  ALL=(ALL)  NOPASSWD: ALL
 
 #

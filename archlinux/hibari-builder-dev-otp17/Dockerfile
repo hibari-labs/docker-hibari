@@ -23,7 +23,7 @@ MAINTAINER Tatsuya Kawano
 RUN pacman -Syu --noconfirm
 
 # Install basic utilities
-RUN pacman -S --noconfirm curl git make ngrep openssh strace tmux wget
+RUN pacman -S --noconfirm curl git make ngrep openssh strace sudo tmux wget
 
 # Create a user for clus tool
 RUN (useradd -m clus; \
@@ -37,7 +37,7 @@ RUN (useradd -m clus; \
 ADD ./999-sudoers-clus /etc/sudoers.d/999-sudoers-clus
 RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
 
-# Install Python 2 and make it the default for root user
+# Install Python 2 and make it the default for users
 # (Python 2 is required by repo)
 RUN pacman -S --noconfirm python2
 RUN (mkdir /root/bin; \
@@ -56,7 +56,7 @@ RUN pacman -S --noconfirm erlang-nox
 RUN pacman -S --noconfirm thrift
 
 # Download Thrift client libraries
-RUN git clone https://github.com/apache/thrift.git
+RUN git clone https://github.com/apache/thrift.git /home/clus/thrift
 
 # Download Hibari source code
 RUN (git config --global user.email "noreply@hibaridb.org"; \
