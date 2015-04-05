@@ -64,8 +64,8 @@ RUN git clone https://github.com/apache/thrift.git
 # Download Hibari source code
 RUN (git config --global user.email "noreply@hibaridb.org"; \
      git config --global user.name "Hibari User")
-RUN (wget -O /usr/local/bin/repo http://commondatastorage.googleapis.com/git-repo-downloads/repo; \
-     chmod a+x /usr/local/bin/repo)
+ADD ./repo /usr/local/bin/repo
+RUN chmod a+x /usr/local/bin/repo
 RUN (mkdir /home/clus/hibari; \
      cd /home/clus/hibari; \
      repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b dev; \
