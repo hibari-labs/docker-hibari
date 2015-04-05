@@ -52,6 +52,12 @@ RUN (mkdir /home/clus/bin; \
 # Install Erlang/OTP 17 from Arch Linux pacage
 RUN pacman -S --noconfirm erlang-nox
 
+# Download Basho Bench and build it
+RUN pacman -S --noconfirm r gcc
+RUN (git clone https://github.com/basho/basho_bench.git /home/clus/basho_bench; \
+     cd /home/clus/basho_bench; \
+     make)
+
 # Install Thrift IDL Compiler (without client libraries)
 RUN pacman -S --noconfirm thrift
 
@@ -77,12 +83,6 @@ RUN (cd /home/clus/hibari/hibari; make package)
 
 # Download Hibari clus tool and set up ssh keys
 RUN git clone https://github.com/hibari/clus.git /home/clus/clus
-
-# Download Basho Bench and build it
-RUN pacman -S --noconfirm r gcc
-RUN (git clone https://github.com/basho/basho_bench.git /home/clus/basho_bench; \
-     cd /home/clus/basho_bench; \
-     make)
 
 # chown the stuff for clus user
 RUN chown -R clus:clus /home/clus/
