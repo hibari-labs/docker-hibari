@@ -90,7 +90,8 @@ RUN (mkdir /home/clus/hibari; \
      repo status)
 
 # Build Hibari
-RUN (cd /home/clus/hibari/hibari; make package)
+RUN (source /usr/local/erlang/17.5_hipe/activate; \
+     cd /home/clus/hibari/hibari; make package)
 
 # Download Hibari clus tool and set up ssh keys
 RUN git clone https://github.com/hibari/clus.git /home/clus/clus
