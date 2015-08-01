@@ -85,8 +85,7 @@ RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
 # Install Erlang/OTP 17 with kerl
 ADD ./kerlrc /root/.kerlrc
 ADD ./kerlrc /home/clus/.kerlrc
-RUN (cd /home/culs; \
-     wget -O /usr/local/bin/kerl https://raw.githubusercontent.com/spawngrid/kerl/master/kerl; \
+RUN (wget -O /usr/local/bin/kerl https://raw.githubusercontent.com/spawngrid/kerl/master/kerl; \
      chmod a+x /usr/local/bin/kerl; \
      kerl update releases; \
      kerl build 17.5 17.5_hipe; \

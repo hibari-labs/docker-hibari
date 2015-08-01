@@ -51,12 +51,11 @@ RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
 # Install Erlang/OTP 17 with kerl
 ADD ./kerlrc /root/.kerlrc
 ADD ./kerlrc /home/clus/.kerlrc
-RUN (cd /home/culs; \
-     wget -O /usr/local/bin/kerl https://raw.githubusercontent.com/spawngrid/kerl/master/kerl; \
+RUN (wget -O /usr/local/bin/kerl https://raw.githubusercontent.com/spawngrid/kerl/master/kerl; \
      chmod a+x /usr/local/bin/kerl; \
      kerl update releases; \
-     kerl build 17.4 17.4_hipe; \
-     kerl install 17.4_hipe /usr/local/erlang/17.4_hipe)
+     kerl build 17.5 17.5_hipe; \
+     kerl install 17.5_hipe /usr/local/erlang/17.5_hipe)
 
 # Download Thrift client libraries
 RUN git clone https://github.com/apache/thrift.git
@@ -75,7 +74,7 @@ RUN (mkdir /home/clus/hibari; \
      repo status)
 
 # Build Hibari
-RUN (source /usr/local/erlang/17.4_hipe/activate; \
+RUN (source /usr/local/erlang/17.5_hipe/activate; \
      cd /home/clus/hibari/hibari; \
      make package)
 
@@ -86,7 +85,7 @@ RUN git clone https://github.com/hibari/clus.git /home/clus/clus
 RUN yum -y install gcc-c++
 RUN (git clone https://github.com/basho/basho_bench.git /home/clus/basho_bench; \
      cd /home/clus/basho_bench; \
-     source /usr/local/erlang/17.4_hipe/activate; \
+     source /usr/local/erlang/17.5_hipe/activate; \
      make)
 
 # chown the stuff for clus user
