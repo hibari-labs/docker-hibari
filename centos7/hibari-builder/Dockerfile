@@ -19,43 +19,28 @@
 # version if you need it.
 #
 
-FROM centos:centos7
+FROM quay.io/tatsuya6502/erlang:centos7-multi-otp
 MAINTAINER Tatsuya Kawano
 
 # ENV ...
 
-# Update preinstalled packages
-RUN yum -y update
-
-# Install basic utilities
-RUN yum -y install curl expect git make ngrep openssh-clients strace sudo tar tmux wget
-
 # Install packages to build Erlang/OTP
-RUN yum -y install gcc glibc-devel make ncurses-devel openssl-devel autoconf
+RUN yum -y install libtool automake
 
-# Install Python (Python 2 is required by repo)
+# Install Python 2 (required by repo)
 # RUN yum -y install python
 
 # Create a user for clus tool
-RUN (useradd -m clus; \
-     echo "clus:ChangeMe0!" | chpasswd; \
-     su clus -c "mkdir -p /home/clus/.ssh"; \
-     su clus -c "touch /home/clus/.ssh/authorized_keys"; \
-     chmod 700 /home/clus/.ssh; \
+RUN (useradd -m clus && \
+     echo "clus:ChangeMe0!" | chpasswd && \
+     su clus -c "mkdir -p /home/clus/.ssh" && \
+     su clus -c "touch /home/clus/.ssh/authorized_keys" && \
+     chmod 700 /home/clus/.ssh && \
      chmod 600 /home/clus/.ssh/authorized_keys)
 
 # Add clus to sudoers and disable requiretty for it
 ADD ./999-sudoers-clus /etc/sudoers.d/999-sudoers-clus
 RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
-
-# Install Erlang/OTP 17 with kerl
-ADD ./kerlrc /root/.kerlrc
-ADD ./kerlrc /home/clus/.kerlrc
-RUN (wget -O /usr/local/bin/kerl https://raw.githubusercontent.com/spawngrid/kerl/master/kerl; \
-     chmod a+x /usr/local/bin/kerl; \
-     kerl update releases; \
-     kerl build 17.5 17.5_hipe; \
-     kerl install 17.5_hipe /usr/local/erlang/17.5_hipe)
 
 # Download Thrift client libraries
 RUN git clone https://github.com/apache/thrift.git
@@ -65,28 +50,21 @@ RUN (git config --global user.email "noreply@hibaridb.org"; \
      git config --global user.name "Hibari User")
 ADD ./repo /usr/local/bin/repo
 RUN chmod a+x /usr/local/bin/repo
-RUN (mkdir /home/clus/hibari; \
-     cd /home/clus/hibari; \
-     repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b dev; \
-     repo sync; \
-     repo forall -c "git branch dev origin/dev"; \
-     repo forall -c "git checkout dev"; \
+RUN (mkdir /home/clus/hibari && \
+     cd /home/clus/hibari && \
+     repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b dev && \
+     repo sync && \
+     repo forall -c "git branch dev origin/dev" && \
+     repo forall -c "git checkout dev" && \
      repo status)
 
 # Build Hibari
-RUN (source /usr/local/erlang/17.5_hipe/activate; \
-     cd /home/clus/hibari/hibari; \
+RUN (source /usr/local/erlang/17.5.6.3_hipe/activate && \
+     cd /home/clus/hibari/hibari && \
      make package)
 
 # Download Hibari clus tool and set up ssh keys
 RUN git clone https://github.com/hibari/clus.git /home/clus/clus
-
-# Download Basho Bench and build it
-RUN yum -y install gcc-c++
-RUN (git clone https://github.com/basho/basho_bench.git /home/clus/basho_bench; \
-     cd /home/clus/basho_bench; \
-     source /usr/local/erlang/17.5_hipe/activate; \
-     make)
 
 # chown the stuff for clus user
 RUN chown -R clus:clus /home/clus/
