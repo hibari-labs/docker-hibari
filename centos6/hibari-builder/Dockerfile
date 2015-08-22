@@ -63,10 +63,10 @@ ADD ./repo /usr/local/bin/repo
 RUN chmod a+x /usr/local/bin/repo
 RUN (mkdir /home/clus/hibari; \
      cd /home/clus/hibari; \
-     repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b dev; \
+     repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b master; \
      repo sync; \
-     repo forall -c "git branch dev origin/dev"; \
-     repo forall -c "git checkout dev"; \
+     repo forall -c "git branch master origin/master"; \
+     repo forall -c "git checkout master"; \
      repo status)
 
 # Build Hibari
