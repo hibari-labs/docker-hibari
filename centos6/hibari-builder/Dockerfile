@@ -19,47 +19,18 @@
 # version if you need it.
 #
 
-FROM centos:centos6
+FROM quay.io/tatsuya6502/erlang:centos6-multi-otp
 MAINTAINER Tatsuya Kawano
 
 # ENV ...
 
-# Update preinstalled packages
-RUN yum -y update
+# Install packages to build Hibari
+RUN yum -y install libtool
 
-# Install basic utilities
-RUN yum -y install curl expect git make openssh-clients strace sudo tar screen wget
-
-# Install packages to build Erlang/OTP
-RUN yum -y install gcc glibc-devel make ncurses-devel openssl-devel libtool
-# RUN yum -y install gcc glibc-devel make ncurses-devel openssl-devel autoconf
-
-# Install Python (Python 2 is required by repo)
+# Install Python 2 (required by repo)
 # RUN yum -y install python
 
-# Update git (required by repo)
-RUN (yum -y install git; \
-     cd /tmp; \
-     git clone git://git.kernel.org/pub/scm/git/git.git; \
-     yum -y remove git; \
-     yum -y install curl-devel expat-devel gettext-devel openssl-devel zlib-devel; \
-     yum -y install perl-ExtUtils-MakeMaker; \
-     cd git; \
-     make prefix=/usr/local all; \
-     make prefix=/usr/local install)
-
-# Update autoconf (required by HyperLevelDB)
-RUN (cd /tmp; \
-     wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz; \
-     tar xvf autoconf-2.69.tar.gz; \
-     cd autoconf-2.69; \
-     ./configure --prefix=/usr; \
-     make; \
-     make install; \
-     cd ..; \
-     rm -rf autoconf-*)
-
-# Update automake (required by HyperLevelDB)
+# Install the latest automake (required by snappy)
 RUN (cd /tmp; \
      wget http://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz; \
      tar xvf automake-1.15.tar.gz; \
@@ -82,15 +53,6 @@ RUN (useradd -m clus; \
 ADD ./999-sudoers-clus /etc/sudoers.d/999-sudoers-clus
 RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
 
-# Install Erlang/OTP 17 with kerl
-ADD ./kerlrc /root/.kerlrc
-ADD ./kerlrc /home/clus/.kerlrc
-RUN (wget -O /usr/local/bin/kerl https://raw.githubusercontent.com/spawngrid/kerl/master/kerl; \
-     chmod a+x /usr/local/bin/kerl; \
-     kerl update releases; \
-     kerl build 17.5 17.5_hipe; \
-     kerl install 17.5_hipe /usr/local/erlang/17.5_hipe)
-
 # Download Thrift client libraries
 RUN git clone https://github.com/apache/thrift.git
 
@@ -108,19 +70,12 @@ RUN (mkdir /home/clus/hibari; \
      repo status)
 
 # Build Hibari
-RUN (source /usr/local/erlang/17.5_hipe/activate; \
+RUN (source /usr/local/erlang/17.5.6.3_hipe/activate; \
      cd /home/clus/hibari/hibari; \
      make package)
 
 # Download Hibari clus tool and set up ssh keys
 RUN git clone https://github.com/hibari/clus.git /home/clus/clus
-
-# Download Basho Bench and build it
-RUN yum -y install gcc-c++
-RUN (git clone https://github.com/basho/basho_bench.git /home/clus/basho_bench; \
-     cd /home/clus/basho_bench; \
-     source /usr/local/erlang/17.5_hipe/activate; \
-     make)
 
 # chown the stuff for clus user
 RUN chown -R clus:clus /home/clus/
