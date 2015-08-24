@@ -16,6 +16,9 @@
 ## limitations under the License.
 ##----------------------------------------------------------------------
 
+BUILDER_IMAGE=quay.io/hibaridb/hibari-builder:dev-centos6
+DEPLOY_BASE_IMAGE=quay.io/hibaridb/hibari-deploy-base:centos6
+
 docker kill hibari6
 docker kill hibari5
 docker kill hibari4
@@ -30,29 +33,18 @@ docker rm hibari2
 docker rm hibari1
 docker rm hibari-builder
 
-docker run -d --name hibari1 -h hibari1 \
-           quay.io/hibaridb/hibari-deploy-base:latest-centos7
+docker run -d --name hibari1 -h hibari1 $DEPLOY_BASE_IMAGE
+docker run -d --name hibari2 -h hibari2 $DEPLOY_BASE_IMAGE
+docker run -d --name hibari3 -h hibari3 $DEPLOY_BASE_IMAGE
+docker run -d --name hibari4 -h hibari4 $DEPLOY_BASE_IMAGE
+docker run -d --name hibari5 -h hibari5 $DEPLOY_BASE_IMAGE
+docker run -d --name hibari6 -h hibari6 $DEPLOY_BASE_IMAGE
 
-docker run -d --name hibari2 -h hibari2 \
-           quay.io/hibaridb/hibari-deploy-base:latest-centos7
-
-docker run -d --name hibari3 -h hibari3 \
-           quay.io/hibaridb/hibari-deploy-base:latest-centos7
-
-docker run -d --name hibari4 -h hibari4 \
-           quay.io/hibaridb/hibari-deploy-base:latest-centos7
-
-docker run -d --name hibari5 -h hibari5 \
-           quay.io/hibaridb/hibari-deploy-base:latest-centos7
-
-docker run -d --name hibari6 -h hibari6 \
-           quay.io/hibaridb/hibari-deploy-base:latest-centos7
-
-docker run -it --name hibari-builder -h hibari-builder \
+docker run -u clus -it --name hibari-builder -h hibari-builder \
            --link=hibari1:hibari1 \
            --link=hibari2:hibari2 \
            --link=hibari3:hibari3 \
            --link=hibari4:hibari4 \
            --link=hibari5:hibari5 \
            --link=hibari6:hibari6 \
-           quay.io/hibaridb/hibari-builder:dev-otp17-archlinux bash
+           $BUILDER_IMAGE bash

@@ -19,10 +19,9 @@ MAINTAINER Tatsuya Kawano
 
 # ENV ...
 
-# Update preinstalled packages
-RUN (yum -y update; \
+RUN (yum -y update && \
 # Install basic utilities
-     yum -y install hostname ngrep openssh-clients openssh-server passwd strace sudo tar tmux; \
+     yum -y install hostname ngrep openssh-clients openssh-server passwd strace sudo tar tmux && \
 # Install required libraries for Erlang/OTP runtime
      yum -y install ncurses openssl)
 
@@ -36,7 +35,7 @@ RUN (ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key; \
 
 # Create a user for clus tool
 RUN (useradd -m clus; \
-     echo "clus:ChangeMe0!" | chpasswd; \
+     echo "clus:ChangeMe_0" | chpasswd; \
      su clus -c "mkdir -p /home/clus/.ssh"; \
      su clus -c "touch /home/clus/.ssh/authorized_keys"; \
      chmod 700 /home/clus/.ssh; \
