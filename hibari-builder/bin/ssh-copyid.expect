@@ -1,0 +1,20 @@
+#!/usr/bin/expect
+
+set timeout 9
+set hostname     [lindex $argv 0]
+
+spawn ssh-copy-id $hostname
+
+expect {
+    timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
+    eof { exit 0 }
+
+    "*re you sure you want to continue connecting" {
+        send "yes\r"
+        exp_continue
+    }
+    "*assword*" {
+        send "ChangeMe_0\r"
+        exp_continue
+    }
+}
