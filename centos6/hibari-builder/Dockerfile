@@ -24,8 +24,10 @@ MAINTAINER Tatsuya Kawano
 
 # ENV ...
 
+# Install basic utilities
+RUN (yum -y install expect openssh-clients screen strace sudo which && \
 # Install packages to build Hibari
-RUN yum -y install libtool
+     yum -y install libtool)
 
 # Install Python 2 (required by repo)
 # RUN yum -y install python
@@ -53,8 +55,18 @@ RUN (useradd -m clus; \
 ADD ./999-sudoers-clus /etc/sudoers.d/999-sudoers-clus
 RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
 
+# Copy kerl status from /root/.kerl to /home/clus/.kerl
+RUN mkdir -p /home/clus/.kerl && \
+    cp -p /root/.kerl/otp_* /home/clus/.kerl && \
+    chown -R clus:clus /home/clus/.kerl
+
+# Add scripts
+ADD ./bin /home/clus/bin
+RUN (chown -R clus:clus /home/clus/bin && \
+     chmod +x /home/clus/bin/*)
+
 # Download Thrift client libraries
-RUN git clone https://github.com/apache/thrift.git
+RUN git clone https://github.com/apache/thrift.git /home/clus/thrift
 
 # Download Hibari source code
 RUN (git config --global user.email "noreply@hibaridb.org"; \
@@ -63,11 +75,11 @@ ADD ./repo /usr/local/bin/repo
 RUN chmod a+x /usr/local/bin/repo
 RUN (mkdir /home/clus/hibari; \
      cd /home/clus/hibari; \
-     repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b dev; \
-     repo sync; \
-     repo forall -c "git branch dev origin/dev"; \
-     repo forall -c "git checkout dev"; \
-     repo status)
+     /usr/local/bin/repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b dev; \
+     /usr/local/bin/repo sync; \
+     /usr/local/bin/repo forall -c "git branch dev origin/dev"; \
+     /usr/local/bin/repo forall -c "git checkout dev"; \
+     /usr/local/bin/repo status)
 
 # Build Hibari
 RUN (source /usr/local/erlang/17.5.6.3_hipe/activate; \
@@ -79,3 +91,5 @@ RUN git clone https://github.com/hibari/clus.git /home/clus/clus
 
 # chown the stuff for clus user
 RUN chown -R clus:clus /home/clus/
+
+# CMD
