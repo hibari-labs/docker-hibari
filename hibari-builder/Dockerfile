@@ -17,8 +17,10 @@
 FROM quay.io/tatsuya6502/erlang:archlinux-multi-otp
 MAINTAINER Tatsuya Kawano
 
+# Update pre-installed packages
+RUN (pacman -Syu --noconfirm && \
 # Install basic utilities
-RUN (pacman -S --noconfirm expect openssh screen strace sudo tmux which && \
+     pacman -S --noconfirm expect openssh screen strace sudo tmux which && \
 # Install packages to build Hibari (HyperLevelDB or RocketDB, since v0.3)
      pacman -S --noconfirm automake libtool)
 
