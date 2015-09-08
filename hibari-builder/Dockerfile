@@ -52,7 +52,7 @@ RUN (chown clus:clus /home/clus/.ssh/config && \
 USER clus
 
 # Download Thrift client libraries
-RUN git clone https://github.com/apache/thrift.git
+RUN git clone https://github.com/apache/thrift.git /home/clus/thrift
 
 # Download Hibari clus tool
 RUN git clone https://github.com/hibari/clus.git /home/clus/clus
