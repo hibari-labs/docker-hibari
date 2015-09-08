@@ -26,70 +26,76 @@ MAINTAINER Tatsuya Kawano
 
 # Install basic utilities
 RUN (yum -y install expect openssh-clients screen strace sudo which && \
-# Install packages to build Hibari
-     yum -y install libtool)
+# Install packages to build Hibari (HyperLevelDB or RocketDB, since v0.3)
+     yum -y install gcc-c++ libtool)
 
 # Install Python 2 (required by repo)
 # RUN yum -y install python
 
 # Install the latest automake (required by snappy)
-RUN (cd /tmp; \
-     wget http://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz; \
-     tar xvf automake-1.15.tar.gz; \
-     cd automake-1.15; \
-     ./configure --prefix=/usr; \
-     make; \
-     make install; \
-     cd ..; \
+RUN (cd /tmp && \
+     wget http://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz && \
+     tar xvf automake-1.15.tar.gz && \
+     cd automake-1.15 && \
+     ./configure --prefix=/usr && \
+     make && \
+     make install && \
+     cd .. && \
      rm -rf audomake-*)
 
 # Create a user for clus tool
-RUN (useradd -m clus; \
-     echo "clus:ChangeMe0!" | chpasswd; \
-     su clus -c "mkdir -p /home/clus/.ssh"; \
-     su clus -c "touch /home/clus/.ssh/authorized_keys"; \
-     chmod 700 /home/clus/.ssh; \
+RUN (useradd -m clus && \
+     echo "clus:ChangeMe_0" | chpasswd && \
+     su clus -c "mkdir -p /home/clus/.ssh" && \
+     su clus -c "touch /home/clus/.ssh/authorized_keys" && \
+     chmod 700 /home/clus/.ssh && \
      chmod 600 /home/clus/.ssh/authorized_keys)
 
 # Add clus to sudoers and disable requiretty for it
 ADD ./999-sudoers-clus /etc/sudoers.d/999-sudoers-clus
 RUN chmod 440 /etc/sudoers.d/999-sudoers-clus
 
+# ssh StrictHostKeyChecking=no
+ADD ./ssh_config /root/.ssh/config
+ADD ./ssh_config /home/clus/.ssh/config
+RUN (chown clus:clus /home/clus/.ssh/config && \
+     chmod 644 /root/.ssh/config && \
+     chmod 644 /home/clus/.ssh/config)
+
 # Copy kerl status from /root/.kerl to /home/clus/.kerl
 RUN mkdir -p /home/clus/.kerl && \
     cp -p /root/.kerl/otp_* /home/clus/.kerl && \
     chown -R clus:clus /home/clus/.kerl
 
+USER clus
+
 # Add scripts
 ADD ./bin /home/clus/bin
-RUN (chown -R clus:clus /home/clus/bin && \
+RUN (sudo chown -R clus:clus /home/clus/bin && \
      chmod +x /home/clus/bin/*)
 
 # Download Thrift client libraries
 RUN git clone https://github.com/apache/thrift.git /home/clus/thrift
 
+# Download Hibari clus tool
+RUN git clone https://github.com/hibari/clus.git /home/clus/clus
+ADD ./hibari.config /home/worker/hibari.config
+
 # Download Hibari source code
-RUN (git config --global user.email "noreply@hibaridb.org"; \
+RUN (git config --global user.email "noreply@hibaridb.org" && \
      git config --global user.name "Hibari User")
 ADD ./repo /usr/local/bin/repo
-RUN chmod a+x /usr/local/bin/repo
-RUN (mkdir /home/clus/hibari; \
-     cd /home/clus/hibari; \
-     /usr/local/bin/repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b master; \
-     /usr/local/bin/repo sync; \
-     /usr/local/bin/repo forall -c "git branch dev origin/master"; \
-     /usr/local/bin/repo forall -c "git checkout master"; \
+RUN sudo chmod a+x /usr/local/bin/repo
+RUN (mkdir /home/clus/hibari && \
+     cd /home/clus/hibari && \
+     /usr/local/bin/repo init -u git://github.com/hibari/manifests.git -m hibari-default.xml -b master && \
+     /usr/local/bin/repo sync && \
+     (/usr/local/bin/repo forall -c "git checkout master" || true) && \
      /usr/local/bin/repo status)
 
 # Build Hibari
-RUN (source /usr/local/erlang/17.5.6.3_hipe/activate; \
-     cd /home/clus/hibari/hibari; \
+RUN (source /usr/local/erlang/17.5.6.3_hipe/activate && \
+     cd /home/clus/hibari/hibari && \
      make package)
-
-# Download Hibari clus tool and set up ssh keys
-RUN git clone https://github.com/hibari/clus.git /home/clus/clus
-
-# chown the stuff for clus user
-RUN chown -R clus:clus /home/clus/
 
 # CMD
